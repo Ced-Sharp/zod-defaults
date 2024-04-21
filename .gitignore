@@ -8,4 +8,5 @@ docs/
 
 *.iml
 *-lock.json
+*-lock.yaml
 *.lock

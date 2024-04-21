@@ -1,11 +1,31 @@
 {
   "name": "zod-defaults",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.0",
+  "description": "Default values matching a Zod schema",
+  "type": "module",
+  "main": "dist/zod-defaults.cjs.js",
+  "module": "dist/zod-defaults.esm.js",
+  "browser": "dist/zod-defaults.umd.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "dev": "rollup -c -w",
+    "build": "rollup -c",
+    "test": "jest"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "CedSharp",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "eslint": "^9.1.0",
+    "rollup": "^4.16.0",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5"
+  }
 }
