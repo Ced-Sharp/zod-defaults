@@ -57,6 +57,14 @@ type ZodTypeConstructor<T extends z.ZodTypeAny> = new (
   definition: Extract<T, { _def: z.ZodAnyDef }>['_def']
 ) => T;
 
+// Cannot use instanceof, because users might use different
+// Zod version, this utility helps with that.
+const isOfType = <T extends SupportedZodTypes>(
+  element: SupportedZodTypes,
+  type: ZodTypeConstructor<T>
+): element is T =>
+  element.constructor.name === type.name;
+
 const defaultZodValueGetterMap = new Map<
   ZodTypeConstructor<SupportedZodTypes>,
   DefaultGetter<SupportedZodTypes>
@@ -76,8 +84,8 @@ defaultZodValueGetterMap.set(z.ZodDefault, (f: z.ZodDefault<any>) =>
 
 // Optional might have a default value
 defaultZodValueGetterMap.set(z.ZodOptional, (f: z.ZodOptional<any>) =>
-  f._def.innerType instanceof z.ZodDefault
-    ? f._def.innerType._def.defaultValue()
+  isOfType<z.ZodDefault<SupportedZodTypes>>(f._def.innerType as SupportedZodTypes, z.ZodDefault)
+    ? (f._def.innerType as z.ZodDefault<SupportedZodTypes>)._def.defaultValue()
     : undefined
 );
 
@@ -143,21 +151,20 @@ function getSchemaDefaultForField<T extends SupportedZodTypes>(
 function getSchemaDefaultForObject<T extends SupportedZodTypes>(
   schema: T
 ): z.infer<T> | Record<string, never> {
-  if (schema instanceof z.ZodRecord) {
+  if (isOfType<z.ZodRecord<z.ZodTypeAny>>(schema, z.ZodRecord)) {
     return {};
   }
 
-  if (schema instanceof z.ZodIntersection) {
+  if (isOfType<z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny>>(schema, z.ZodIntersection)) {
     return {
       ...getSchemaDefaultForObject(schema._def.left as SupportedZodTypes),
       ...getSchemaDefaultForObject(schema._def.right as SupportedZodTypes),
     } as z.infer<T>;
   }
 
-  if (schema instanceof z.ZodUnion) {
+  if (isOfType<z.ZodUnion<[z.ZodTypeAny, ...z.ZodTypeAny[]]>>(schema, z.ZodUnion)) {
     for (const option of schema._def.options) {
-      // noinspection SuspiciousTypeOfGuard
-      if (option instanceof z.ZodObject) {
+      if (isOfType<z.ZodObject<z.ZodRawShape>>(option, z.ZodObject)) {
         return getSchemaDefaultForObject(option) as z.infer<T>;
       }
     }
@@ -168,7 +175,7 @@ function getSchemaDefaultForObject<T extends SupportedZodTypes>(
     return {};
   }
 
-  if (!(schema instanceof z.ZodObject)) {
+  if (!isOfType<z.ZodObject<z.ZodRawShape>>(schema, z.ZodObject)) {
     console.warn(
       `getSchemaDefaultObject: Expected object schema, got ${schema.constructor.name}`
     );
