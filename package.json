@@ -1,6 +1,6 @@
 {
   "name": "zod-defaults",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Default values matching a Zod schema",
   "type": "module",
   "main": "dist/zod-defaults.cjs",
