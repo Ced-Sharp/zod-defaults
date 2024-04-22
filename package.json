@@ -1,6 +1,6 @@
 {
   "name": "zod-defaults",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Default values matching a Zod schema",
   "type": "module",
   "main": "dist/zod-defaults.cjs.js",
@@ -23,7 +23,15 @@
     "type": "git",
     "url": "https://git.cedsharp.dev/CedSharp/zod-defaults"
   },
-  "keywords": ["zod", "default", "defaults", "auto", "automatic", "empty", "value"],
+  "keywords": [
+    "zod",
+    "default",
+    "defaults",
+    "auto",
+    "automatic",
+    "empty",
+    "value"
+  ],
   "author": "CedSharp",
   "license": "MIT",
   "devDependencies": {
