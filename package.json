@@ -23,9 +23,9 @@
     "type": "git",
     "url": "https://git.cedsharp.dev/CedSharp/zod-defaults"
   },
-  "keywords": [],
+  "keywords": ["zod", "default", "defaults", "auto", "automatic", "empty", "value"],
   "author": "CedSharp",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
