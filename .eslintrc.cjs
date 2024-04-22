@@ -36,6 +36,9 @@ module.exports = {
         },
       },
     ],
+    // Due to supporting "any" zod schema, we cannot enforce this rule
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-unsafe-return': 'off',
   },
   plugins: ['@typescript-eslint', 'import', 'prefer-arrow', 'unicorn', 'prettier']
 };
