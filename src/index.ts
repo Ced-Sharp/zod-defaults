@@ -82,6 +82,12 @@ defaultZodValueGetterMap.set(z.ZodDefault, (f: z.ZodDefault<any>) =>
   f._def.defaultValue()
 );
 
+// Effects is just a wrapper of another type
+defaultZodValueGetterMap.set(
+  z.ZodEffects<any>,
+  (f: z.ZodEffects<any>) => getSchemaDefaultForField(f._def.schema)
+);
+
 // Optional might have a default value
 defaultZodValueGetterMap.set(z.ZodOptional, (f: z.ZodOptional<any>) =>
   isOfType<z.ZodDefault<SupportedZodTypes>>(f._def.innerType as SupportedZodTypes, z.ZodDefault)
