@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://git.cedsharp.dev/CedSharp/zod-defaults"
+    "url": "https://github.com/Ced-Sharp/zod-defaults"
   },
   "keywords": [
     "zod",
