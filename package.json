@@ -12,8 +12,16 @@
   ],
   "scripts": {
     "dev": "rollup -c -w",
-    "build": "rollup -c",
-    "test": "jest"
+    "build": "run-s lint test build:clean build:js",
+    "build:js": "rollup -c",
+    "build:clean": "rimraf dist",
+    "lint": "eslint 'src/**/*.{js,ts}' -c .eslintrc.cjs",
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.cedsharp.dev/CedSharp/zod-defaults"
   },
   "keywords": [],
   "author": "CedSharp",
@@ -22,8 +30,23 @@
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
-    "eslint": "^9.1.0",
+    "@types/jest": "^29.5.12",
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-unicorn": "^52.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "mkdirp": "^3.0.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
     "rollup": "^4.16.0",
+    "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
     "typescript": "^5.4.5"
