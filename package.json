@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "description": "Default values matching a Zod schema",
   "type": "module",
-  "main": "dist/zod-defaults.cjs.js",
+  "main": "dist/zod-defaults.cjs",
   "module": "dist/zod-defaults.esm.js",
   "browser": "dist/zod-defaults.umd.js",
   "types": "dist/index.d.ts",
