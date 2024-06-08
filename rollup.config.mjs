@@ -1,7 +1,6 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
-import pkg from './package.json' assert { type: 'json' };
 
 export default [
   // Browser
@@ -9,7 +8,7 @@ export default [
     input: 'src/index.ts',
     output: {
       name: 'zod-defaults',
-      file: pkg.browser,
+      file: "dist/zod-defaults.umd.js",
       format: 'umd',
     },
     plugins: [
@@ -23,8 +22,8 @@ export default [
   {
     input: 'src/index.ts',
     output: [
-      { file: pkg.main, format: 'cjs' },
-      { file: pkg.module, format: 'es' },
+      { file: "dist/zod-defaults.cjs", format: 'cjs' },
+      { file: "dist/zod-defaults.esm.js", format: 'es' },
     ],
     external: ['zod'],
     plugins: [typescript({ tsconfig: './tsconfig.json' })],

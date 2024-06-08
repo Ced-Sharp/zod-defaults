@@ -209,7 +209,7 @@ function getSchemaDefaultForObject<T extends SupportedZodTypes>(
   return Object.fromEntries(
     Object.entries(schema.shape as Record<string, SupportedZodTypes>)
       .map(([key, field]) => [key, getSchemaDefaultForField(field)])
-      .filter(([_, field]) => typeof field !== 'undefined')
+      .filter(entry => entry[1] !== undefined)
   ) as z.infer<T>;
 }
 

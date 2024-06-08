@@ -5,7 +5,7 @@ module.exports = {
     'node_modules',
     'coverage',
     '.eslintrc.cjs',
-    'rollup.config.js',
+    'rollup.config.mjs',
     'jest.config.cjs',
     '*.test.ts'
   ],
