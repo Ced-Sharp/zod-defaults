@@ -40,6 +40,7 @@ describe('Zod Defaults', () => {
     const schema = z.object({ name: z.string().optional() });
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(typeof schemaDefaults.name).toBe('undefined');
+    expect(Object.keys(schemaDefaults).indexOf('name')).toBe(-1);
   });
 
   it('should correctly return a default value for an optional field that has defined a default value', () => {
@@ -201,5 +202,11 @@ describe('Zod Defaults', () => {
     // @ts-expect-error Testing invalid schema values for JS users
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(schemaDefaults).toStrictEqual({});
+  });
+
+  it('should correctly return a default value for schemas that have a .refine()', () => {
+    const schema = z.object({ username: z.string() }).refine(() => true);
+    const schemaDefaults = getDefaultsForSchema(schema);
+    expect(schemaDefaults).toStrictEqual({ username: '' });
   });
 });

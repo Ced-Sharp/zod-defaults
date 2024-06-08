@@ -62,8 +62,7 @@ type ZodTypeConstructor<T extends z.ZodTypeAny> = new (
 const isOfType = <T extends SupportedZodTypes>(
   element: SupportedZodTypes,
   type: ZodTypeConstructor<T>
-): element is T =>
-  element.constructor.name === type.name;
+): element is T => element.constructor.name === type.name;
 
 const defaultZodValueGetterMap = new Map<
   string,
@@ -83,14 +82,16 @@ defaultZodValueGetterMap.set(z.ZodDefault.name, (f: z.ZodDefault<any>) =>
 );
 
 // Effects is just a wrapper of another type
-defaultZodValueGetterMap.set(
-  z.ZodEffects.name,
-  (f: z.ZodEffects<any>) => getSchemaDefaultForField(f._def.schema)
+defaultZodValueGetterMap.set(z.ZodEffects.name, (f: z.ZodEffects<any>) =>
+  getSchemaDefaultForField(f._def.schema)
 );
 
 // Optional might have a default value
 defaultZodValueGetterMap.set(z.ZodOptional.name, (f: z.ZodOptional<any>) =>
-  isOfType<z.ZodDefault<SupportedZodTypes>>(f._def.innerType as SupportedZodTypes, z.ZodDefault)
+  isOfType<z.ZodDefault<SupportedZodTypes>>(
+    f._def.innerType as SupportedZodTypes,
+    z.ZodDefault
+  )
     ? (f._def.innerType as z.ZodDefault<SupportedZodTypes>)._def.defaultValue()
     : undefined
 );
@@ -161,14 +162,31 @@ function getSchemaDefaultForObject<T extends SupportedZodTypes>(
     return {};
   }
 
-  if (isOfType<z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny>>(schema, z.ZodIntersection)) {
+  if (
+    isOfType<
+      z.ZodEffects<
+        z.ZodObject<any> | z.ZodUnion<any> | z.ZodIntersection<any, any>
+      >
+    >(schema, z.ZodEffects)
+  ) {
+    return getSchemaDefaultForObject(schema._def.schema);
+  }
+
+  if (
+    isOfType<z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny>>(
+      schema,
+      z.ZodIntersection
+    )
+  ) {
     return {
       ...getSchemaDefaultForObject(schema._def.left as SupportedZodTypes),
       ...getSchemaDefaultForObject(schema._def.right as SupportedZodTypes),
     } as z.infer<T>;
   }
 
-  if (isOfType<z.ZodUnion<[z.ZodTypeAny, ...z.ZodTypeAny[]]>>(schema, z.ZodUnion)) {
+  if (
+    isOfType<z.ZodUnion<[z.ZodTypeAny, ...z.ZodTypeAny[]]>>(schema, z.ZodUnion)
+  ) {
     for (const option of schema._def.options) {
       if (isOfType<z.ZodObject<z.ZodRawShape>>(option, z.ZodObject)) {
         return getSchemaDefaultForObject(option) as z.infer<T>;
@@ -189,9 +207,9 @@ function getSchemaDefaultForObject<T extends SupportedZodTypes>(
   }
 
   return Object.fromEntries(
-    Object.entries(schema.shape as Record<string, SupportedZodTypes>).map(
-      ([key, field]) => [key, getSchemaDefaultForField(field)]
-    )
+    Object.entries(schema.shape as Record<string, SupportedZodTypes>)
+      .map(([key, field]) => [key, getSchemaDefaultForField(field)])
+      .filter(([_, field]) => typeof field !== 'undefined')
   ) as z.infer<T>;
 }
 
@@ -221,7 +239,13 @@ function getSchemaDefaultForObject<T extends SupportedZodTypes>(
  * @param schema
  */
 export function getDefaultsForSchema<
-  T extends z.ZodObject<any> | z.ZodUnion<any> | z.ZodIntersection<any, any>,
+  T extends
+    | z.ZodObject<any>
+    | z.ZodUnion<any>
+    | z.ZodIntersection<any, any>
+    | z.ZodEffects<
+        z.ZodObject<any> | z.ZodUnion<any> | z.ZodIntersection<any, any>
+      >,
 >(schema: T): z.infer<T> {
   return getSchemaDefaultForObject(schema);
 }
