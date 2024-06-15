@@ -3,16 +3,15 @@
   "version": "0.1.2",
   "description": "Generate an 'empty' default object from a zod schema, mainly meant for initial state of a form.",
   "type": "module",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "types": "dist/index.d.ts",
   "main": "dist/zod-defaults.umd.js",
   "module": "dist/zod-defaults.js",
   "exports": {
     ".": {
       "import": "./dist/zod-defaults.js",
-      "require": "./dist/zod-defaults.umd.js"
+      "require": "./dist/zod-defaults.umd.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "scripts": {
