@@ -1,98 +1,99 @@
-import { getDefaultsForSchema } from './index';
-import { z } from 'zod';
+import { describe, expect, it } from "vitest";
+import { z } from "zod";
+import { getDefaultsForSchema } from "../src";
 
-describe('Zod Defaults', () => {
-  it('should return undefined for unsupported zod field types', () => {
+describe("Zod Defaults", () => {
+  it("should return undefined for unsupported zod field types", () => {
     const schema = z.object({ unsupported: z.unknown() });
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(schemaDefaults.unsupported).toBe(undefined);
   });
 
-  it('should correctly return a default value for a boolean field', () => {
+  it("should correctly return a default value for a boolean field", () => {
     const schema = z.object({ success: z.boolean() });
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.success).toBe('boolean');
+    expect(typeof schemaDefaults.success).toBe("boolean");
     expect(schemaDefaults.success).toBe(false);
   });
 
-  it('should correctly return a default value for a number field', () => {
+  it("should correctly return a default value for a number field", () => {
     const schema = z.object({ count: z.number() });
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.count).toBe('number');
+    expect(typeof schemaDefaults.count).toBe("number");
     expect(schemaDefaults.count).toBe(0);
   });
 
-  it('should correctly return a default value for a string field', () => {
+  it("should correctly return a default value for a string field", () => {
     const schema = z.object({ name: z.string() });
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.name).toBe('string');
-    expect(schemaDefaults.name).toBe('');
+    expect(typeof schemaDefaults.name).toBe("string");
+    expect(schemaDefaults.name).toBe("");
   });
 
-  it('should correctly return a default value for an array field', () => {
+  it("should correctly return a default value for an array field", () => {
     const schema = z.object({ options: z.array(z.string()) });
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(Array.isArray(schemaDefaults.options)).toBe(true);
     expect(schemaDefaults.options).toStrictEqual([]);
   });
 
-  it('should correctly omit optional field values from defaults', () => {
+  it("should correctly omit optional field values from defaults", () => {
     const schema = z.object({ name: z.string().optional() });
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.name).toBe('undefined');
-    expect(Object.keys(schemaDefaults).indexOf('name')).toBe(-1);
+    expect(typeof schemaDefaults.name).toBe("undefined");
+    expect(Object.keys(schemaDefaults).indexOf("name")).toBe(-1);
   });
 
-  it('should correctly return a default value for an optional field that has defined a default value', () => {
-    const schema = z.object({ name: z.string().default('John').optional() });
+  it("should correctly return a default value for an optional field that has defined a default value", () => {
+    const schema = z.object({ name: z.string().default("John").optional() });
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.name).toBe('string');
-    expect(schemaDefaults.name).toBe('John');
+    expect(typeof schemaDefaults.name).toBe("string");
+    expect(schemaDefaults.name).toBe("John");
   });
 
-  it('should correctly return a default value for the first value of an union field', () => {
+  it("should correctly return a default value for the first value of an union field", () => {
     // string first
     const schema = z.object({
       id: z.string().or(z.number()),
     });
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.id).toBe('string');
-    expect(schemaDefaults.id).toBe('');
+    expect(typeof schemaDefaults.id).toBe("string");
+    expect(schemaDefaults.id).toBe("");
 
     // number first
     const schema2 = z.object({
       id: z.number().or(z.string()),
     });
     const schemaDefaults2 = getDefaultsForSchema(schema2);
-    expect(typeof schemaDefaults2.id).toBe('number');
+    expect(typeof schemaDefaults2.id).toBe("number");
     expect(schemaDefaults2.id).toBe(0);
   });
 
-  it('should correctly return a default value for an union field with at least one object as the schema', () => {
+  it("should correctly return a default value for an union field with at least one object as the schema", () => {
     const schema = z.string().or(z.object({ name: z.string() }));
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults).toBe('object');
+    expect(typeof schemaDefaults).toBe("object");
     expect(Array.isArray(schemaDefaults)).toBe(false);
-    expect(schemaDefaults).toStrictEqual({ name: '' });
+    expect(schemaDefaults).toStrictEqual({ name: "" });
   });
 
-  it('should return an empty object when providing an union with no objects as the schema', () => {
+  it("should return an empty object when providing an union with no objects as the schema", () => {
     const schema = z.string().or(z.number());
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(Array.isArray(schemaDefaults)).toBe(false);
     expect(schemaDefaults).toStrictEqual({});
   });
 
-  it('should correctly return a default value for a tuple field', () => {
+  it("should correctly return a default value for a tuple field", () => {
     const schema = z.object({
       user: z.tuple([z.string(), z.number(), z.boolean()]),
     });
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(Array.isArray(schemaDefaults.user)).toBe(true);
-    expect(schemaDefaults.user).toStrictEqual(['', 0, false]);
+    expect(schemaDefaults.user).toStrictEqual(["", 0, false]);
   });
 
-  it('should correctly return a default value for an object field (nested)', () => {
+  it("should correctly return a default value for an object field (nested)", () => {
     const schema = z.object({
       user: z.object({
         name: z.string(),
@@ -100,22 +101,22 @@ describe('Zod Defaults', () => {
       }),
     });
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.user).toBe('object');
+    expect(typeof schemaDefaults.user).toBe("object");
     expect(Array.isArray(schemaDefaults.user)).toBe(false);
-    expect(schemaDefaults.user).toStrictEqual({ name: '', age: 0 });
+    expect(schemaDefaults.user).toStrictEqual({ name: "", age: 0 });
   });
 
-  it('should correctly return a default value for a record field', () => {
+  it("should correctly return a default value for a record field", () => {
     const schema = z.object({
       users: z.record(z.string()),
     });
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.users).toBe('object');
+    expect(typeof schemaDefaults.users).toBe("object");
     expect(Array.isArray(schemaDefaults.users)).toBe(false);
     expect(schemaDefaults.users).toStrictEqual({});
   });
 
-  it('should correctly return a default value composed from all of the values of an intersection field', () => {
+  it("should correctly return a default value composed from all of the values of an intersection field", () => {
     const type1 = z.object({
       name: z.string(),
     });
@@ -128,12 +129,12 @@ describe('Zod Defaults', () => {
     });
 
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.user).toBe('object');
+    expect(typeof schemaDefaults.user).toBe("object");
     expect(Array.isArray(schemaDefaults.user)).toBe(false);
-    expect(schemaDefaults.user).toStrictEqual({ name: '', age: 0 });
+    expect(schemaDefaults.user).toStrictEqual({ name: "", age: 0 });
   });
 
-  it('should correctly return a default value composed from all the values of an intersection field (nested)', () => {
+  it("should correctly return a default value composed from all the values of an intersection field (nested)", () => {
     const type1 = z.object({
       name: z.string(),
     });
@@ -149,16 +150,16 @@ describe('Zod Defaults', () => {
     });
 
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.user).toBe('object');
+    expect(typeof schemaDefaults.user).toBe("object");
     expect(Array.isArray(schemaDefaults.user)).toBe(false);
     expect(schemaDefaults.user).toStrictEqual({
-      name: '',
+      name: "",
       age: 0,
       isStudying: false,
     });
   });
 
-  it('should correctly return a default value for a tuple field composed of complex fields (nested)', () => {
+  it("should correctly return a default value for a tuple field composed of complex fields (nested)", () => {
     const schema = z.object({
       user: z.tuple([
         z.object({
@@ -170,43 +171,43 @@ describe('Zod Defaults', () => {
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(Array.isArray(schemaDefaults.user)).toBe(true);
     expect(schemaDefaults.user).toStrictEqual([
-      { name: '' },
+      { name: "" },
       [{ age: 0 }, false],
     ]);
   });
 
-  it('should correctly return a default value for fields that have effects (like .refine())', () => {
+  it("should correctly return a default value for fields that have effects (like .refine())", () => {
     const schema = z.object({
       name: z
         .string()
-        .refine(val => val === 'John', { message: 'Name must be John' }),
+        .refine((val) => val === "John", { message: "Name must be John" }),
     });
 
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.name).toBe('string');
-    expect(schemaDefaults.name).toBe('');
+    expect(typeof schemaDefaults.name).toBe("string");
+    expect(schemaDefaults.name).toBe("");
   });
 
-  it('should correctly return a default value for fields that have a default value', () => {
+  it("should correctly return a default value for fields that have a default value", () => {
     const schema = z.object({
-      name: z.string().default('John'),
+      name: z.string().default("John"),
     });
 
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(typeof schemaDefaults.name).toBe('string');
-    expect(schemaDefaults.name).toBe('John');
+    expect(typeof schemaDefaults.name).toBe("string");
+    expect(schemaDefaults.name).toBe("John");
   });
 
-  it('should fail to retrieve default values for a schema that is not an object', () => {
+  it("should fail to retrieve default values for a schema that is not an object", () => {
     const schema = z.string();
     // @ts-expect-error Testing invalid schema values for JS users
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(schemaDefaults).toStrictEqual({});
   });
 
-  it('should correctly return a default value for schemas that have a .refine()', () => {
+  it("should correctly return a default value for schemas that have a .refine()", () => {
     const schema = z.object({ username: z.string() }).refine(() => true);
     const schemaDefaults = getDefaultsForSchema(schema);
-    expect(schemaDefaults).toStrictEqual({ username: '' });
+    expect(schemaDefaults).toStrictEqual({ username: "" });
   });
 });
