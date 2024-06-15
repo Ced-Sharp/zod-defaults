@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "description": "Generate an 'empty' default object from a zod schema, mainly meant for initial state of a form.",
   "type": "module",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
+  "types": "dist/index.d.ts",
   "main": "dist/zod-defaults.umd.js",
   "module": "dist/zod-defaults.js",
   "exports": {
@@ -16,7 +15,7 @@
   },
   "scripts": {
     "prebuild": "rimraf dist && npm run lint && npm run test",
-    "build": "tsc && vite build && npm run minify",
+    "build": "vite build && tsc && npm run minify",
     "minify": "esbuild dist/zod-defaults.js --minify --outfile=dist/zod-defaults.js --allow-overwrite",
     "lint": "biome check src",
     "test": "vitest --run",
