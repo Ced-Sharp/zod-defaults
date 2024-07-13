@@ -210,4 +210,20 @@ describe("Zod Defaults", () => {
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(schemaDefaults).toStrictEqual({ username: "" });
   });
+
+  it("should correctly return default value for native enum", () => {
+    enum COLOR {
+      RED,
+      GREEN,
+      YELLOW,
+    };
+    const schema = z.object({
+      color1: z.nativeEnum(COLOR),
+      color2: z.nativeEnum(COLOR).default(COLOR.RED)
+    });
+    const schemaDefaults = getDefaultsForSchema(schema);
+    expect(schemaDefaults).toStrictEqual({
+      color2: COLOR.RED
+    });
+  });
 });

@@ -37,7 +37,8 @@ export type AdvancedSupportedZodTypes =
   | z.ZodDefault<any>
   | z.ZodOptional<any>
   | z.ZodUnion<any>
-  | z.ZodIntersection<any, any>;
+  | z.ZodIntersection<any, any>
+  | z.ZodNativeEnum<any>;
 
 /**
  * A type which represents all the supported Zod types.
@@ -75,6 +76,7 @@ defaultZodValueGetterMap.set(z.ZodNumber.name, () => 0);
 defaultZodValueGetterMap.set(z.ZodString.name, () => "");
 defaultZodValueGetterMap.set(z.ZodArray.name, () => []);
 defaultZodValueGetterMap.set(z.ZodRecord.name, () => ({}));
+defaultZodValueGetterMap.set(z.ZodNativeEnum.name, () => undefined);
 
 // Custom default value
 defaultZodValueGetterMap.set(z.ZodDefault.name, (f: z.ZodDefault<any>) =>
