@@ -36,12 +36,12 @@ npm install zod-defaults
 
 ## Usage
 
-Create a schema and call the `generateDefaultsForSchema` function to generate an object
+Create a schema and call the `getDefaultsForSchema` function to generate an object
 filled with the default or empty values matching your schema.
 
 ```typescript
 import {z} from 'zod';
-import {generateDefaultsForSchema} from 'zod-defaults';
+import {getDefaultsForSchema} from 'zod-defaults';
 
 const schema = z.object({
     name: z.string().default('John Doe'),
@@ -49,7 +49,7 @@ const schema = z.object({
     isStudent: z.boolean(),
 });
 
-const person = generateDefaultsForSchema(schema);
+const person = getDefaultsForSchema(schema);
 
 console.log(person);
 // { name: 'John Doe', age: 0, isStudent: false }
