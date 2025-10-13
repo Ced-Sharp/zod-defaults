@@ -14,7 +14,8 @@
 
 A Zod utility library to generate default values for Zod schemas.
 
-> [!IMPORTAN]
+> [!IMPORTANT]
+>
 > Version <0.2 are for Zod v3.
 > Version 0.2+ are for Zod v4.
 

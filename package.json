@@ -1,6 +1,6 @@
 {
   "name": "zod-defaults",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Generate an 'empty' default object from a zod schema, mainly meant for initial state of a form.",
   "type": "module",
   "files": ["dist"],
