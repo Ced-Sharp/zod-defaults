@@ -22,7 +22,7 @@ export type SimpleSupportedZodTypes =
 export type BaseSupportedZodTypes =
   | SimpleSupportedZodTypes
   | z.ZodRecord<any, any>
-  | z.ZodObject<any, any, any, any, any>
+  | z.ZodObject<any, any> // Zod v4 uses two arguments 👈
   | z.ZodTuple<[any, ...any[]]>;
 
 /**
@@ -33,7 +33,7 @@ export type BaseSupportedZodTypes =
  * TODO: Add support for missing Zod types.
  */
 export type AdvancedSupportedZodTypes =
-  | z.ZodEffects<any>
+  | z.ZodPipe<any, any> // Zod v4 uses transforms instead of obsolete zodEffects 👈
   | z.ZodDefault<any>
   | z.ZodOptional<any>
   | z.ZodUnion<any>
@@ -51,10 +51,12 @@ type BaseDefaultGetter = () => unknown;
 type AdvancedDefaultGetter<T extends SupportedZodTypes> = (field: T) => unknown;
 type DefaultGetter<T extends SupportedZodTypes> =
   T extends SimpleSupportedZodTypes
-    ? BaseDefaultGetter
-    : AdvancedDefaultGetter<T>;
-type ZodTypeConstructor<T extends z.ZodTypeAny> = new (
-  definition: Extract<T, { _def: z.ZodAnyDef }>["_def"],
+  ? BaseDefaultGetter
+  : AdvancedDefaultGetter<T>;
+// In Zod v4, internal structure changed (_def is now _zod.def). 👈
+// This type is used for constructor name comparison, not actual instantiation.
+type ZodTypeConstructor<T extends z.ZodType> = new (
+  ...args: any[]
 ) => T;
 
 // Cannot use instanceof, because users might use different
@@ -78,39 +80,40 @@ defaultZodValueGetterMap.set(z.ZodRecord.name, () => ({}));
 
 // Custom default value
 defaultZodValueGetterMap.set(z.ZodDefault.name, (f: z.ZodDefault<any>) =>
-  f._def.defaultValue(),
+  f.def.defaultValue,
 );
 
-// Effects is just a wrapper of another type
-defaultZodValueGetterMap.set(z.ZodEffects.name, (f: z.ZodEffects<any>) =>
-  getSchemaDefaultForField(f._def.schema),
+// In Zod v4, ZodEffects was replaced with ZodPipe for transforms 👈
+// ZodPipe wraps the input schema, so we need to unwrap it
+defaultZodValueGetterMap.set(z.ZodPipe.name, (f: z.ZodPipe<any, any>) =>
+  getSchemaDefaultForField(f.def.in),
 );
 
-// Optional might have a default value
+// Optional might have a default value. Casted so we can keep using isOfType() 👈
 defaultZodValueGetterMap.set(z.ZodOptional.name, (f: z.ZodOptional<any>) =>
   isOfType<z.ZodDefault<SupportedZodTypes>>(
-    f._def.innerType as SupportedZodTypes,
-    z.ZodDefault,
+    f.def.innerType as SupportedZodTypes,
+    z.ZodDefault as any, // Cast to bypass the type mismatch
   )
-    ? (f._def.innerType as z.ZodDefault<SupportedZodTypes>)._def.defaultValue()
+    ? (f.def.innerType as z.ZodDefault<SupportedZodTypes>).def.defaultValue
     : undefined,
 );
 
 // Tuples are combination of multiple types
 defaultZodValueGetterMap.set(z.ZodTuple.name, (f: z.ZodTuple<any>) => {
   const tuple: unknown[] = [];
-  for (const item of f._def.items as SupportedZodTypes[]) {
+  for (const item of f.def.items as SupportedZodTypes[]) {
     tuple.push(getSchemaDefaultForField(item));
   }
   return tuple;
 });
 
-// All object types should recursively call getSchemaDefaultObject()
-defaultZodValueGetterMap.set(z.ZodEffects.name, (f: z.ZodEffects<any>) =>
-  getSchemaDefaultForField(f._def.schema as SupportedZodTypes),
+// All pipe types should recursively call getSchemaDefaultForField() on the input schema 👈
+defaultZodValueGetterMap.set(z.ZodPipe.name, (f: z.ZodPipe<any, any>) =>
+  getSchemaDefaultForField(f.def.in as SupportedZodTypes),
 );
 defaultZodValueGetterMap.set(z.ZodUnion.name, (f: z.ZodUnion<any>) =>
-  getSchemaDefaultForField((f._def.options as SupportedZodTypes[])[0]),
+  getSchemaDefaultForField((f.def.options as SupportedZodTypes[])[0]),
 );
 defaultZodValueGetterMap.set(z.ZodObject.name, (f: z.ZodObject<any>) =>
   getSchemaDefaultForObject(f),
@@ -158,38 +161,38 @@ function getSchemaDefaultForField<T extends SupportedZodTypes>(
 function getSchemaDefaultForObject<T extends SupportedZodTypes>(
   schema: T,
 ): z.infer<T> | Record<string, never> {
-  if (isOfType<z.ZodRecord<z.ZodTypeAny>>(schema, z.ZodRecord)) {
+  if (isOfType<z.ZodRecord<any, any>>(schema, z.ZodRecord as any)) {
     return {};
   }
 
   if (
     isOfType<
-      z.ZodEffects<
+      z.ZodPipe<
         z.ZodObject<any> | z.ZodUnion<any> | z.ZodIntersection<any, any>
       >
-    >(schema, z.ZodEffects)
+    >(schema, z.ZodPipe as any)
   ) {
-    return getSchemaDefaultForObject(schema._def.schema);
+    return getSchemaDefaultForObject(schema.def.in);
   }
 
   if (
     isOfType<z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny>>(
       schema,
-      z.ZodIntersection,
+      z.ZodIntersection as any,
     )
   ) {
     return {
-      ...getSchemaDefaultForObject(schema._def.left as SupportedZodTypes),
-      ...getSchemaDefaultForObject(schema._def.right as SupportedZodTypes),
+      ...getSchemaDefaultForObject(schema.def.left as SupportedZodTypes),
+      ...getSchemaDefaultForObject(schema.def.right as SupportedZodTypes),
     } as z.infer<T>;
   }
 
   if (
-    isOfType<z.ZodUnion<[z.ZodTypeAny, ...z.ZodTypeAny[]]>>(schema, z.ZodUnion)
+    isOfType<z.ZodUnion<[z.ZodTypeAny, ...z.ZodTypeAny[]]>>(schema, z.ZodUnion as any)
   ) {
-    for (const option of schema._def.options) {
-      if (isOfType<z.ZodObject<z.ZodRawShape>>(option, z.ZodObject)) {
-        return getSchemaDefaultForObject(option) as z.infer<T>;
+    for (const option of schema.def.options) {
+      if (isOfType<z.ZodObject<any, any>>(option as SupportedZodTypes, z.ZodObject as any)) {
+        return getSchemaDefaultForObject(option as SupportedZodTypes) as z.infer<T>;
       }
     }
 
@@ -199,7 +202,7 @@ function getSchemaDefaultForObject<T extends SupportedZodTypes>(
     return {};
   }
 
-  if (!isOfType<z.ZodObject<z.ZodRawShape>>(schema, z.ZodObject)) {
+  if (!isOfType<z.ZodObject<any, any>>(schema, z.ZodObject as any)) {
     console.warn(
       `getSchemaDefaultObject: Expected object schema, got ${schema.constructor.name}`,
     );
@@ -240,12 +243,13 @@ function getSchemaDefaultForObject<T extends SupportedZodTypes>(
  */
 export function getDefaultsForSchema<
   T extends
-    | z.ZodObject<any>
-    | z.ZodUnion<any>
-    | z.ZodIntersection<any, any>
-    | z.ZodEffects<
-        z.ZodObject<any> | z.ZodUnion<any> | z.ZodIntersection<any, any>
-      >,
+  | z.ZodObject<any>
+  | z.ZodUnion<any>
+  | z.ZodIntersection<any, any>
+  | z.ZodPipe<
+    z.ZodObject<any, any> | z.ZodUnion<any> | z.ZodIntersection<any, any>,
+    any
+  >,
 >(schema: T): z.infer<T> {
-  return getSchemaDefaultForObject(schema);
+  return getSchemaDefaultForObject(schema) as z.infer<T>;
 }

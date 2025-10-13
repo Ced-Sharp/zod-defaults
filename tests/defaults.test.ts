@@ -108,7 +108,7 @@ describe("Zod Defaults", () => {
 
   it("should correctly return a default value for a record field", () => {
     const schema = z.object({
-      users: z.record(z.string()),
+      users: z.record(z.string(), z.string()),
     });
     const schemaDefaults = getDefaultsForSchema(schema);
     expect(typeof schemaDefaults.users).toBe("object");
