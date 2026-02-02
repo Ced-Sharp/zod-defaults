@@ -37,7 +37,8 @@ export type AdvancedSupportedZodTypes =
   | z.ZodDefault<any>
   | z.ZodOptional<any>
   | z.ZodUnion<any>
-  | z.ZodIntersection<any, any>;
+  | z.ZodIntersection<any, any>
+  | z.ZodLiteral<any>;
 
 /**
  * A type which represents all the supported Zod types.
@@ -123,6 +124,12 @@ defaultZodValueGetterMap.set(z.ZodRecord.name, (f: z.ZodRecord<any>) =>
 defaultZodValueGetterMap.set(
   z.ZodIntersection.name,
   (f: z.ZodIntersection<any, any>) => getSchemaDefaultForObject(f),
+);
+
+// literals are stored as sets, we must iterate to retreive the first
+defaultZodValueGetterMap.set(
+  z.ZodLiteral.name,
+  (f: z.ZodLiteral<any>) => f.values.values().next().value,
 );
 
 /**
