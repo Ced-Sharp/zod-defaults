@@ -30,6 +30,27 @@ describe("Zod Defaults", () => {
     expect(schemaDefaults.name).toBe("");
   });
 
+  it("should correctly return a default value for a string literal field", () => {
+    const schema = z.object({ type: z.literal("alpha") });
+    const schemaDefaults = getDefaultsForSchema(schema);
+    expect(typeof schemaDefaults.type).toBe("string");
+    expect(schemaDefaults.type).toBe("alpha");
+  });
+
+  it("should correctly return a default value for multi-string literal field", () => {
+    const schema = z.object({ type: z.literal(["alpha", "beta", "gamma"]) });
+    const schemaDefaults = getDefaultsForSchema(schema);
+    expect(typeof schemaDefaults.type).toBe("string");
+    expect(schemaDefaults.type).toBe("alpha");
+  });
+
+  it("should correctly return a default value for number literal fields", () => {
+    const schema = z.object({ type: z.literal([1, 2, 3]) });
+    const schemaDefaults = getDefaultsForSchema(schema);
+    expect(typeof schemaDefaults.type).toBe("number");
+    expect(schemaDefaults.type).toBe(1);
+  });
+
   it("should correctly return a default value for an array field", () => {
     const schema = z.object({ options: z.array(z.string()) });
     const schemaDefaults = getDefaultsForSchema(schema);
