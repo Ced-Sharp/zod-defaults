@@ -3,35 +3,38 @@
   "version": "0.2.3",
   "description": "Generate an 'empty' default object from a zod schema, mainly meant for initial state of a form.",
   "type": "module",
-  "files": ["dist"],
-  "types": "dist/index.d.ts",
-  "main": "dist/zod-defaults.umd.js",
-  "module": "dist/zod-defaults.js",
+  "sideEffects": false,
   "exports": {
+    "./package.json": "./package.json",
     ".": {
-      "import": "./dist/zod-defaults.js",
-      "require": "./dist/zod-defaults.umd.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "prebuild": "rimraf dist && npm run lint && npm run test",
-    "build": "vite build && tsc && npm run minify",
-    "minify": "esbuild dist/zod-defaults.js --minify --outfile=dist/zod-defaults.js --allow-overwrite",
     "lint": "biome check src",
     "test": "vitest --run",
-    "prepublishOnly": "npm run build"
+    "build": "npm run build:js && npm run build:types",
+    "build:js": "bun build ./src/index.ts --outfile=dist/index.js --format=esm --target=browser",
+    "build:types": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
   },
   "peerDependencies": {
-    "zod": "^4.1.12"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.6",
     "@types/node": "^24.7.2",
-    "rimraf": "^6.0.1",
     "typescript": "^5.9.3",
-    "vite": "^7.1.9",
+    "vite": "^7.3.1",
     "vitest": "^3.2.4"
-  },
-  "packageManager": "pnpm@10.18.2"
+  }
 }
